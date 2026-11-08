@@ -1,0 +1,70 @@
+name: Pure Source Code Compiler
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  # --- COMPILE WINDOWS EXE ---
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Source Files
+        uses: actions/checkout@v7
+
+      - name: Setup Node runtime
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Package HTML into Windows EXE
+        run: |
+          npm install -g nativefier
+          nativefier --name "IncrementalApp" --app-version "1.0.1" --platform "windows" --arch "x64" --single-instance ./ dist/
+
+      - name: Upload Windows Executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-app
+          path: dist/IncrementalApp-win32-x64/
+          
+  # --- COMPILE ANDROID APK ---
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Files
+        uses: actions/checkout@v7
+
+      - name: Setup Java Development Kit
+        uses: actions/setup-java@v6
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Node runtime
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Build Android Environment from scratch
+        run: |
+          # Generate a disposable package config setting the target app version to 1.0.1
+          echo '{"name": "incremental-app", "version": "1.0.1"}' > package.json
+          echo '{"appId": "com.incremental.app", "appName": "Incremental App", "webDir": "."}' > capacitor.config.json
+          
+          # Install global packages dynamically 
+          npm install @capacitor/cli @capacitor/core @capacitor/android
+          
+          # Initialize Android platform wrapper project
+          npx cap add android
+          npx cap sync android
+          
+          # Run the standard Android system compiler
+          cd android && ./gradlew assembleDebug
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
