@@ -1,4 +1,4 @@
-name: Pure Source Code Compiler
+name: Biild
 
 on:
   push:
@@ -21,13 +21,16 @@ jobs:
       - name: Package HTML into Windows EXE
         run: |
           npm install -g nativefier
-          nativefier --name "IncrementalApp" --app-version "1.0.1" --platform "windows" --arch "x64" --single-instance ./ dist/
+          # Create the explicit output folder ahead of time
+          mkdir win-dist
+          # Force Nativefier to drop the binary files directly into our explicit directory path
+          nativefier --name "IncrementalApp" --app-version "1.0.1" --platform "windows" --arch "x64" --single-instance ./ win-dist/
 
       - name: Upload Windows Executable
         uses: actions/upload-artifact@v4
         with:
           name: windows-app
-          path: dist/IncrementalApp-win32-x64/
+          path: win-dist/
           
   # --- COMPILE ANDROID APK ---
   build-android:
@@ -49,18 +52,25 @@ jobs:
 
       - name: Build Android Environment from scratch
         run: |
-          # Generate a disposable package config setting the target app version to 1.0.1
-          echo '{"name": "incremental-app", "version": "1.0.1"}' > package.json
-          echo '{"appId": "com.incremental.app", "appName": "Incremental App", "webDir": "."}' > capacitor.config.json
+          # 1. Structure a real web directory for asset allocation
+          mkdir -p www
+          cp index.html www/
+          cp style.css www/
+          cp app.js www/
           
-          # Install global packages dynamically 
+          # 2. Write minimalist local manifest parameters
+          echo '{"name": "incremental-app", "version": "1.0.1"}' > package.json
+          echo '{"appId": "com.incremental.app", "appName": "Incremental App", "webDir": "www"}' > capacitor.config.json
+          
+          # 3. Explicitly install dependencies so native plugins bridge seamlessly
           npm install @capacitor/cli @capacitor/core @capacitor/android
           
-          # Initialize Android platform wrapper project
+          # 4. Generate native framework directories and force resource copy
           npx cap add android
+          npx cap copy android
           npx cap sync android
           
-          # Run the standard Android system compiler
+          # 5. Compile Android Binary
           cd android && ./gradlew assembleDebug
 
       - name: Upload Android APK
