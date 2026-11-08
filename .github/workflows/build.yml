@@ -1,4 +1,4 @@
-name: Biild
+name: Pure Source Code Compiler
 
 on:
   push:
@@ -21,16 +21,13 @@ jobs:
       - name: Package HTML into Windows EXE
         run: |
           npm install -g nativefier
-          # Create the explicit output folder ahead of time
-          mkdir win-dist
-          # Force Nativefier to drop the binary files directly into our explicit directory path
-          nativefier --name "IncrementalApp" --app-version "1.0.1" --platform "windows" --arch "x64" --single-instance ./ win-dist/
+          nativefier --name "IncrementalApp" --app-version "1.0.1" --platform "windows" --arch "x64" --single-instance ./
 
       - name: Upload Windows Executable
         uses: actions/upload-artifact@v4
         with:
           name: windows-app
-          path: win-dist/
+          path: "*win32-x64/"
           
   # --- COMPILE ANDROID APK ---
   build-android:
@@ -52,11 +49,11 @@ jobs:
 
       - name: Build Android Environment from scratch
         run: |
-          # 1. Structure a real web directory for asset allocation
+          # 1. Structure the temporary web folder using script.js
           mkdir -p www
           cp index.html www/
           cp style.css www/
-          cp app.js www/
+          cp script.js www/
           
           # 2. Write minimalist local manifest parameters
           echo '{"name": "incremental-app", "version": "1.0.1"}' > package.json
@@ -74,7 +71,7 @@ jobs:
           cd android && ./gradlew assembleDebug
 
       - name: Upload Android APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: android-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
