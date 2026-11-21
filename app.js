@@ -17,17 +17,17 @@
   const googolplex = DecimalCtor.pow(10, DecimalCtor.pow(10, 100));
   const powerTower = DecimalCtor.pow(10, DecimalCtor.pow(10, 1000));
   const milestones = [
-    {name:"One thousand", value:D("1e3"), label:"10³"},
-    {name:"One million", value:D("1e6"), label:"10⁶"},
-    {name:"One billion", value:D("1e9"), label:"10⁹"},
+    {name:"A thousand", value:D("1e3"), label:"10³"},
+    {name:"A million", value:D("1e6"), label:"10⁶"},
+    {name:"A billion", value:D("1e9"), label:"10⁹"},
     {name:"Googol", value:D("1e100"), label:"10¹⁰⁰"},
     {name:"Googolplex", value:googolplex, label:"10^(10¹⁰⁰)"},
     {name:"Power tower", value:powerTower, label:"10^(10¹⁰⁰⁰)"},
     {name:"Graham-scale territory", value:null, label:"Beyond ordinary power towers"},
     {name:"TREE(3) concept", value:null, label:"Combinatorial landmark"},
     {name:"Rayo's number concept", value:null, label:"Definability landmark"},
-    {name:"ω / ordinal infinity", value:null, label:"Ordinal concept"},
-    {name:"Absolute infinity", value:null, label:"Fictional endgame concept"}
+    {name:"ω (Omega)", value:null, label:"Ordinal concept"},
+    {name:"Absolute Infinity", value:null, label:"Fictional endgame concept"}
   ];
   let state = {
     number:D(0), clickPower:D(1), generator:D(0), multiplier:D(1),
